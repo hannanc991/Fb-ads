@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Abdul Hannan - FB Ads Services</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header>
+  <h1>Service Provider</h1>
+  <p>Your trusted partner</p>
+</header>
+
+  <nav>
+    <a href="#services">Services</a>
+    <a href="#contact">Contact</a>
+  </nav>
+
+  <main>
+    <section id="services">
+      <h2>Our Services</h2>
+      <div id="services-list"></div>
+    </section>
+
+    <section id="contact">
+  <h2>Contact Info</h2>
+  <p>For inquiries, email: <a id="contact-email" href="#">Loading...</a></p>
+</section>
+  </main>
+
+  <footer>
+    <p>&copy; 2025 Abdul Hannan. All rights reserved.</p>
+  </footer>
+
+  <!-- Firebase App + Firestore (Modular SDK) -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
+    import { getFirestore, collection, getDocs, doc, getDoc } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyDYt3MGCRvPPp9VPdtEDRy005qC8_tA8mw",
+      authDomain: "fb-ads-service-adffa.firebaseapp.com",
+      projectId: "fb-ads-service-adffa",
+      storageBucket: "fb-ads-service-adffa.appspot.com",
+      messagingSenderId: "661851861173",
+      appId: "1:661851861173:web:f2b405ac84fb71a4b9cefc"
+    };
+
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    // Load and display services
+    async function loadServices() {
+      const servicesContainer = document.getElementById("services-list");
+      const querySnapshot = await getDocs(collection(db, "services"));
+
+      querySnapshot.forEach((doc) => {
+        const data = doc.data();
+        servicesContainer.innerHTML += `
+          <div class="service-card">
+            <h3>${data.title}</h3>
+            <p>${data.description}</p>
+            <p><strong>Contact:</strong> ${data.contact}</p>
+            <img src="${data.imageURL}" alt="Service Image" style="max-width: 200px;" onerror="this.style.display='none'" />
+            <hr>
+          </div>
+        `;
+      });
+    }
+
+    // Load contact number from settings (if stored)
+async function loadContactEmail() {
+  const contactLink = document.getElementById("contact-email");
+  const docRef = doc(db, "siteSettings", "contactInfo");
+  const docSnap = await getDoc(docRef);
+  if (docSnap.exists()) {
+    const data = docSnap.data();
+    const email = data.email;
+    contactLink.textContent = email;
+    contactLink.href = `mailto:${email}`;
+  } else {
+    contactLink.textContent = "Email not set";
+    contactLink.removeAttribute("href");
+  }
+}
+
+
+loadContactEmail();
+    loadServices();
+  </script>
+</body>
+</html>
