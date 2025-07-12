@@ -104,14 +104,16 @@
 
       services.forEach(data => {
         servicesContainer.innerHTML += `
-          <div class="service-card">
-            <h3>${data.title}</h3>
-            <p>${data.description}</p>
-            <p><strong>Contact:</strong> ${data.contact}</p>
-            <img src="${data.imageURL}" alt="Service Image" style="max-width: 200px;" onerror="this.style.display='none'" />
-            <hr>
-          </div>
-        `;
+  <div class="service-card">
+    <h3>${data.title}</h3>
+    <p>${data.description}</p>
+    <p><strong>Contact:</strong> ${data.contact}</p>
+    <p><strong>Location:</strong> ${data.location || 'Not specified'}</p>
+    <img src="${data.imageURL}" alt="Service Image" style="max-width: 200px;" onerror="this.style.display='none'" />
+    <hr>
+  </div>
+`;
+
       });
     }
 
