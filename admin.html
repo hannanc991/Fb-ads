@@ -27,6 +27,7 @@
   <textarea id="service-description" placeholder="Description"></textarea>
   <input type="text" id="service-contact" placeholder="Contact Number or Email" />
   <input type="text" id="service-image-url" placeholder="Image URL (from imgbb.com, Google Drive, etc)" />
+  <input type="text" id="service-location" placeholder="Location (City / Country)" />
   <img id="preview-img" alt="Image Preview" />
   <button id="post-service-btn">Post Service</button>
   <button id="logout-btn">Logout</button>
@@ -78,6 +79,7 @@
   const descInput = document.getElementById("service-description");
   const contactInput = document.getElementById("service-contact");
   const imageUrlInput = document.getElementById("service-image-url");
+  const locationInput = document.getElementById("service-location");
   const postServiceBtn = document.getElementById("post-service-btn");
   const previewImg = document.getElementById("preview-img");
 
@@ -122,8 +124,9 @@
     const description = descInput.value.trim();
     const contact = contactInput.value.trim();
     const imageURL = imageUrlInput.value.trim();
+    const location = locationInput.value.trim();
 
-    if (!title || !description || !contact || !imageURL) {
+    if (!title || !description || !contact || !imageURL || !location) {
       alert("Please fill all fields.");
       return;
     }
@@ -131,12 +134,12 @@
     try {
       if (editServiceId) {
         const docRef = doc(db, "services", editServiceId);
-        await updateDoc(docRef, { title, description, contact, imageURL });
+        await updateDoc(docRef, { title, description, contact, imageURL, location });
         alert("Service updated!");
         editServiceId = null;
         postServiceBtn.textContent = "Post Service";
       } else {
-        await addDoc(collection(db, "services"), { title, description, contact, imageURL });
+        await addDoc(collection(db, "services"), { title, description, contact, imageURL, location });
         alert("Service added!");
       }
       clearInputs();
@@ -157,6 +160,7 @@
           <h3>${data.title}</h3>
           <p>${data.description}</p>
           <p><strong>Contact:</strong> <a href="mailto:${data.contact}" style="color: var(--accent-light);">${data.contact}</a></p>
+          <p><strong>Location:</strong> ${data.location}</p>
           <img src="${data.imageURL || ''}" alt="Service Image" onerror="this.style.display='none';" />
           <div class="service-actions">
             <button class="edit-btn" data-id="${id}">Edit</button>
@@ -178,6 +182,7 @@
           descInput.value = data.description;
           contactInput.value = data.contact;
           imageUrlInput.value = data.imageURL;
+          locationInput.value = data.location;
           previewImg.src = data.imageURL;
           previewImg.style.display = "block";
           postServiceBtn.textContent = "Update Service";
@@ -201,6 +206,7 @@
     descInput.value = "";
     contactInput.value = "";
     imageUrlInput.value = "";
+    locationInput.value = "";
     previewImg.style.display = "none";
   }
 
