@@ -5,12 +5,33 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Abdul Hannan - FB Ads Services</title>
   <link rel="stylesheet" href="styles.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <style>
+    #search-container {
+      text-align: center;
+      margin: 20px auto;
+    }
+
+    #search-input {
+      width: 60%;
+      max-width: 400px;
+      padding: 10px;
+      font-size: 1rem;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+    }
+  </style>
 </head>
 <body>
   <header>
-  <h1>Service Provider</h1>
-  <p>Your trusted partner</p>
-</header>
+    <h1>Service Provider</h1>
+    <p>Your trusted partner</p>
+    <button id="dark-mode-toggle">Toggle Mode</button>
+
+
+  </header>
 
   <nav>
     <a href="#services">Services</a>
@@ -20,13 +41,18 @@
   <main>
     <section id="services">
       <h2>Our Services</h2>
+
+      <div id="search-container">
+        <input type="text" id="search-input" placeholder="Search services..." />
+      </div>
+
       <div id="services-list"></div>
     </section>
 
     <section id="contact">
-  <h2>Contact Info</h2>
-  <p>For inquiries, email: <a id="contact-email" href="#">Loading...</a></p>
-</section>
+      <h2>Contact Info</h2>
+      <p>For inquiries, email: <a id="contact-email" href="#">Loading...</a></p>
+    </section>
   </main>
 
   <footer>
@@ -51,13 +77,32 @@
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
 
+    let allServices = []; // for filtering
+
     // Load and display services
     async function loadServices() {
       const servicesContainer = document.getElementById("services-list");
       const querySnapshot = await getDocs(collection(db, "services"));
 
+      allServices = []; // reset array
+
       querySnapshot.forEach((doc) => {
-        const data = doc.data();
+        allServices.push(doc.data());
+      });
+
+      displayServices(allServices);
+    }
+
+    function displayServices(services) {
+      const servicesContainer = document.getElementById("services-list");
+      servicesContainer.innerHTML = "";
+
+      if (services.length === 0) {
+        servicesContainer.innerHTML = `<p style="text-align:center;">No matching services found.</p>`;
+        return;
+      }
+
+      services.forEach(data => {
         servicesContainer.innerHTML += `
           <div class="service-card">
             <h3>${data.title}</h3>
@@ -70,25 +115,47 @@
       });
     }
 
-    // Load contact number from settings (if stored)
-async function loadContactEmail() {
-  const contactLink = document.getElementById("contact-email");
-  const docRef = doc(db, "siteSettings", "contactInfo");
-  const docSnap = await getDoc(docRef);
-  if (docSnap.exists()) {
-    const data = docSnap.data();
-    const email = data.email;
-    contactLink.textContent = email;
-    contactLink.href = `mailto:${email}`;
-  } else {
-    contactLink.textContent = "Email not set";
-    contactLink.removeAttribute("href");
-  }
-}
+    // Load contact number from settings
+    async function loadContactEmail() {
+      const contactLink = document.getElementById("contact-email");
+      const docRef = doc(db, "siteSettings", "contactInfo");
+      const docSnap = await getDoc(docRef);
+      if (docSnap.exists()) {
+        const data = docSnap.data();
+        contactLink.textContent = data.email;
+        contactLink.href = `mailto:${data.email}`;
+      } else {
+        contactLink.textContent = "Email not set";
+        contactLink.removeAttribute("href");
+      }
+    }
 
+    // Filter function
+    function setupSearch() {
+      const input = document.getElementById("search-input");
+      input.addEventListener("input", () => {
+        const value = input.value.toLowerCase();
+        const filtered = allServices.filter(service =>
+          service.title.toLowerCase().includes(value) ||
+          service.description.toLowerCase().includes(value)
+        );
+        displayServices(filtered);
+      });
+    }
 
-loadContactEmail();
-    loadServices();
+    loadContactEmail();
+    loadServices().then(setupSearch);
   </script>
+  <script>
+  const toggleBtn = document.getElementById("dark-mode-toggle");
+  const isDark = localStorage.getItem("darkMode") === "true";
+
+  if (isDark) document.body.classList.add("dark-mode");
+
+  toggleBtn.addEventListener("click", () => {
+    document.body.classList.toggle("dark-mode");
+    localStorage.setItem("darkMode", document.body.classList.contains("dark-mode"));
+  });
+</script>
 </body>
 </html>
